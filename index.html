@@ -74,86 +74,31 @@
         </div>
     </div>
     <script>
-        document.getElementById('generateForm').addEventListener('submit', function(event) {
+        document.getElementById('generateForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const prompt = document.getElementById('prompt').value;
 
-            // Ваши API ключ и секретный ключ
-            const apiKey = '7783589EF56E3DFEE93D1373C2875DA8';
-            const secretKey = '7F0AD079433FB8AA7FA5F09540E1449D';
-
-            const api = new Text2ImageAPI('https://api-key.fusionbrain.ai/', apiKey, secretKey);
-
-            api.getModel().then(modelId => {
-                return api.generate(prompt, modelId);
-            }).then(uuid => {
-                return api.checkGeneration(uuid);
-            }).then(images => {
-                const imageUrl = images[0];
-                const imgElement = document.getElementById('generatedImage');
-                imgElement.src = imageUrl;
-                imgElement.style.display = 'block';
-            }).catch(error => {
-                console.error('Ошибка:', error);
-            });
-        });
-
-        class Text2ImageAPI {
-            constructor(url, apiKey, secretKey) {
-                this.URL = url;
-                this.AUTH_HEADERS = {
-                    'X-Key': `Key ${apiKey}`,
-                    'X-Secret': `Secret ${secretKey}`,
-                };
-            }
-
-            async getModel() {
-                const response = await fetch(this.URL + 'key/api/v1/models', {
-                    headers: this.AUTH_HEADERS
-                });
-                const data = await response.json();
-                return data[0]['id'];
-            }
-
-            async generate(prompt, model, images = 1, width = 1024, height = 1024) {
-                const params = {
-                    "type": "GENERATE",
-                    "numImages": images,
-                    "width": width,
-                    "height": height,
-                    "generateParams": {
-                        "query": `${prompt}`
-                    }
-                };
-
-                const formData = new FormData();
-                formData.append('model_id', model);
-                formData.append('params', JSON.stringify(params));
-
-                const response = await fetch(this.URL + 'key/api/v1/text2image/run', {
+            try {
+                const response = await fetch('http://localhost:5000/generate', {
                     method: 'POST',
-                    headers: this.AUTH_HEADERS,
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt }),
                 });
-                const data = await response.json();
-                return data['uuid'];
-            }
 
-            async checkGeneration(requestId, attempts = 10, delay = 10) {
-                while (attempts > 0) {
-                    const response = await fetch(this.URL + 'key/api/v1/text2image/status/' + requestId, {
-                        headers: this.AUTH_HEADERS
-                    });
-                    const data = await response.json();
-                    if (data['status'] === 'DONE') {
-                        return data['images'];
-                    }
-                    attempts -= 1;
-                    await new Promise(resolve => setTimeout(resolve, delay * 1000));
+                const data = await response.json();
+                if (data.image_url) {
+                    const imgElement = document.getElementById('generatedImage');
+                    imgElement.src = data.image_url;
+                    imgElement.style.display = 'block';
+                } else {
+                    console.error('Ошибка:', data.error);
                 }
-                throw new Error('Превышено количество попыток');
+            } catch (error) {
+                console.error('Ошибка:', error);
             }
-        }
+        });
     </script>
 </body>
 </html>
