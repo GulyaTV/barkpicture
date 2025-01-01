@@ -59,6 +59,11 @@
             height: auto;
             margin-top: 20px;
         }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -71,12 +76,15 @@
         </form>
         <div id="result">
             <img id="generatedImage" src="" alt="Generated Image" style="display:none;">
+            <div id="error" class="error"></div>
         </div>
     </div>
     <script>
         document.getElementById('generateForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const prompt = document.getElementById('prompt').value;
+            const errorElement = document.getElementById('error');
+            errorElement.textContent = ''; // Очистка предыдущих ошибок
 
             try {
                 const response = await fetch('https://bot.gulyatv.ru/generate', {
@@ -92,10 +100,11 @@
                     const imgElement = document.getElementById('generatedImage');
                     imgElement.src = data.image_url;
                     imgElement.style.display = 'block';
-                } else {
-                    console.error('Ошибка:', data.error);
+                } else if (data.error) {
+                    errorElement.textContent = data.error;
                 }
             } catch (error) {
+                errorElement.textContent = 'Произошла ошибка при генерации изображения';
                 console.error('Ошибка:', error);
             }
         });
