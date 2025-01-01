@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gulya AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #generatedImage {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gulya AI - Генератор изображений</h1>
+        <form id="generateForm">
+            <label for="prompt">Введите запрос:</label>
+            <input type="text" id="prompt" name="prompt" required>
+            <button type="submit">Сгенерировать изображение</button>
+        </form>
+        <div id="result">
+            <img id="generatedImage" src="" alt="Generated Image" style="display:none;">
+        </div>
+    </div>
+    <script>
+        document.getElementById('generateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const prompt = document.getElementById('prompt').value;
+
+            // Ваши API ключ и секретный ключ
+            const apiKey = '7783589EF56E3DFEE93D1373C2875DA8';
+            const secretKey = '7F0AD079433FB8AA7FA5F09540E1449D';
+
+            const api = new Text2ImageAPI('https://api-key.fusionbrain.ai/', apiKey, secretKey);
+
+            api.getModel().then(modelId => {
+                return api.generate(prompt, modelId);
+            }).then(uuid => {
+                return api.checkGeneration(uuid);
+            }).then(images => {
+                const imageUrl = images[0];
+                const imgElement = document.getElementById('generatedImage');
+                imgElement.src = imageUrl;
+                imgElement.style.display = 'block';
+            }).catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+
+        class Text2ImageAPI {
+            constructor(url, apiKey, secretKey) {
+                this.URL = url;
+                this.AUTH_HEADERS = {
+                    'X-Key': `Key ${apiKey}`,
+                    'X-Secret': `Secret ${secretKey}`,
+                };
+            }
+
+            async getModel() {
+                const response = await fetch(this.URL + 'key/api/v1/models', {
+                    headers: this.AUTH_HEADERS
+                });
+                const data = await response.json();
+                return data[0]['id'];
+            }
+
+            async generate(prompt, model, images = 1, width = 1024, height = 1024) {
+                const params = {
+                    "type": "GENERATE",
+                    "numImages": images,
+                    "width": width,
+                    "height": height,
+                    "generateParams": {
+                        "query": `${prompt}`
+                    }
+                };
+
+                const formData = new FormData();
+                formData.append('model_id', model);
+                formData.append('params', JSON.stringify(params));
+
+                const response = await fetch(this.URL + 'key/api/v1/text2image/run', {
+                    method: 'POST',
+                    headers: this.AUTH_HEADERS,
+                    body: formData
+                });
+                const data = await response.json();
+                return data['uuid'];
+            }
+
+            async checkGeneration(requestId, attempts = 10, delay = 10) {
+                while (attempts > 0) {
+                    const response = await fetch(this.URL + 'key/api/v1/text2image/status/' + requestId, {
+                        headers: this.AUTH_HEADERS
+                    });
+                    const data = await response.json();
+                    if (data['status'] === 'DONE') {
+                        return data['images'];
+                    }
+                    attempts -= 1;
+                    await new Promise(resolve => setTimeout(resolve, delay * 1000));
+                }
+                throw new Error('Превышено количество попыток');
+            }
+        }
+    </script>
+</body>
+</html>
