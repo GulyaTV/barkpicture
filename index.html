@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GulyaAI Image - Генератор изображений</title>
+    <title>Gulya AI - Image Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,7 +101,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>GulyaAI Image - Генератор изображений</h1>
+        <h1>Gulya AI - Image Generator</h1>
         <input type="text" id="prompt" placeholder="Enter a description for the image">
         <button onclick="generateImage()">Generate Image</button>
         <p class="status" id="status">No image generated yet.</p>
@@ -155,10 +155,21 @@
 
         function downloadImage() {
             const image = document.getElementById("generated-image");
-            const link = document.createElement("a");
-            link.href = image.src;
-            link.download = "generated-image.png";
-            link.click();
+            const imageUrl = image.src;
+
+            // Создаём временную ссылку для скачивания
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "generated-image.png"; // Имя файла для скачивания
+                    link.click(); // Программный клик по ссылке
+                    URL.revokeObjectURL(link.href); // Освобождаем память
+                })
+                .catch(error => {
+                    console.error("Ошибка при скачивании изображения:", error);
+                });
         }
     </script>
 </body>
