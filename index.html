@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GulyaAI Image - Генератор изображений</title>
+    <title>Gulya AI - Image Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #000000; /* Чёрный фон */
             margin: 0;
             padding: 0;
             display: flex;
@@ -15,52 +15,57 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            color: #A47864; /* Мокко Мусс для текста */
         }
 
         .container {
-            background: #ffffff;
+            background: #000000; /* Чёрный фон контейнера */
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(164, 120, 100, 0.3); /* Тень в тон Мокко Мусс */
             width: 90%;
             max-width: 500px;
+            border: 1px solid #A47864; /* Граница в тон Мокко Мусс */
         }
 
         h1 {
             font-size: 24px;
             text-align: center;
-            color: #333;
+            color: #A47864; /* Мокко Мусс для заголовка */
         }
 
         input[type="text"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ddd;
+            border: 1px solid #A47864; /* Граница в тон Мокко Мусс */
             border-radius: 4px;
             font-size: 16px;
+            background-color: #000000; /* Чёрный фон */
+            color: #A47864; /* Мокко Мусс для текста */
         }
 
         button {
             width: 100%;
             padding: 10px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #A47864; /* Мокко Мусс для кнопок */
+            color: #000000; /* Чёрный текст */
             border: none;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
             margin-bottom: 10px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #8C6354; /* Темнее Мокко Мусс для hover */
         }
 
         .status {
             text-align: center;
             font-size: 14px;
-            color: #666;
+            color: #A47864; /* Мокко Мусс для текста */
         }
 
         .image-container {
@@ -71,33 +76,54 @@
 
         .image-container img {
             max-width: 100%;
-            border: 1px solid #ddd;
+            border: 1px solid #A47864; /* Граница в тон Мокко Мусс */
             border-radius: 4px;
+        }
+
+        .download-button {
+            display: none;
+            width: 100%;
+            padding: 10px;
+            background-color: #A47864; /* Мокко Мусс для кнопки */
+            color: #000000; /* Чёрный текст */
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-button:hover {
+            background-color: #8C6354; /* Темнее Мокко Мусс для hover */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>GulyaAI Image - Генератор изображений</h1>
+        <h1>Gulya AI - Image Generator</h1>
         <input type="text" id="prompt" placeholder="Enter a description for the image">
         <button onclick="generateImage()">Generate Image</button>
         <p class="status" id="status">No image generated yet.</p>
         <div class="image-container" id="image-container">
             <img id="generated-image" alt="Generated image">
         </div>
+        <button class="download-button" id="download-button" onclick="downloadImage()">Скачать (изображение)</button>
     </div>
 
     <script>
-        const backendUrl = 'https://bot.gulyatv.ru'; // Replace with your backend URL
+        const backendUrl = 'https://bot.gulyatv.ru'; // Замените на ваш URL бэкенда
 
         async function generateImage() {
             const prompt = document.getElementById("prompt").value;
             const status = document.getElementById("status");
             const imageContainer = document.getElementById("image-container");
             const image = document.getElementById("generated-image");
+            const downloadButton = document.getElementById("download-button");
 
             status.textContent = "Generating image...";
             imageContainer.style.display = "none";
+            downloadButton.style.display = "none";
 
             try {
                 const response = await fetch(`${backendUrl}/generate`, {
@@ -118,12 +144,21 @@
                     status.textContent = "Image generated successfully!";
                     image.src = result.image_url;
                     imageContainer.style.display = "block";
+                    downloadButton.style.display = "block";
                 } else {
                     status.textContent = `Error: ${result.error}`;
                 }
             } catch (error) {
                 status.textContent = `Error: ${error.message}`;
             }
+        }
+
+        function downloadImage() {
+            const image = document.getElementById("generated-image");
+            const link = document.createElement("a");
+            link.href = image.src;
+            link.download = "generated-image.png";
+            link.click();
         }
     </script>
 </body>
