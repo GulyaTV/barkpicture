@@ -1,176 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GulyaAI Image</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #000000; /* Чёрный фон */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            color: #A47864; /* Мокко Мусс для текста */
-        }
+  <meta charset="UTF-8" />
+  <title>BarkPicture — Генератор изображений</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      padding-top: 30px;
+    }
 
-        .container {
-            background: #000000; /* Чёрный фон контейнера */
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(164, 120, 100, 0.3); /* Тень в тон Мокко Мусс */
-            width: 90%;
-            max-width: 500px;
-            border: 1px solid #A47864; /* Граница в тон Мокко Мусс */
-        }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ccc;
+      text-align: center;
+      width: 360px;
+    }
 
-        h1 {
-            font-size: 24px;
-            text-align: center;
-            color: #A47864; /* Мокко Мусс для заголовка */
-        }
+    input, select, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+    }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #A47864; /* Граница в тон Мокко Мусс */
-            border-radius: 4px;
-            font-size: 16px;
-            background-color: #000000; /* Чёрный фон */
-            color: #A47864; /* Мокко Мусс для текста */
-        }
+    img {
+      margin-top: 20px;
+      max-width: 100%;
+    }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #A47864; /* Мокко Мусс для кнопок */
-            color: #000000; /* Чёрный текст */
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: background-color 0.3s ease;
-        }
+    .hidden {
+      display: none;
+    }
 
-        button:hover {
-            background-color: #8C6354; /* Темнее Мокко Мусс для hover */
-        }
-
-        .status {
-            text-align: center;
-            font-size: 14px;
-            color: #A47864; /* Мокко Мусс для текста */
-        }
-
-        .image-container {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .image-container img {
-            max-width: 100%;
-            border: 1px solid #A47864; /* Граница в тон Мокко Мусс */
-            border-radius: 4px;
-        }
-
-        .download-button {
-            display: none;
-            width: 100%;
-            padding: 10px;
-            background-color: #A47864; /* Мокко Мусс для кнопки */
-            color: #000000; /* Чёрный текст */
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        .download-button:hover {
-            background-color: #8C6354; /* Темнее Мокко Мусс для hover */
-        }
-    </style>
+    label {
+      text-align: left;
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>GulyaAI Image — Генератор изображений</h1>
-        <input type="text" id="prompt" placeholder="Enter a description for the image">
-        <button onclick="generateImage()">Generate Image</button>
-        <p class="status" id="status">No image generated yet.</p>
-        <div class="image-container" id="image-container">
-            <img id="generated-image" alt="Generated image">
-        </div>
-        <button class="download-button" id="download-button" onclick="downloadImage()">Скачать (изображение)</button>
+  <div class="container">
+    <h1>BarkPicture</h1>
+
+    <label for="prompt">Описание изображения:</label>
+    <input type="text" id="prompt" placeholder="Пушистый пёс ..." />
+
+    <label for="style">Стиль:</label>
+    <select id="style">
+      <option value="DEFAULT">DEFAULT</option>
+      <option value="KANDINSKY">KANDINSKY</option>
+      <option value="UHD">UHD</option>
+      <option value="ANIME">ANIME</option>
+    </select>
+
+    <label for="ratio">Соотношение сторон:</label>
+    <select id="ratio">
+      <option value="1:1">1:1</option>
+      <option value="16:9">16:9</option>
+      <option value="9:16">9:16</option>
+      <option value="3:2">3:2</option>
+      <option value="2:3">2:3</option>
+      <option value="custom-ratio">Кастомное соотношение</option>
+      <option value="custom-size">Кастомные размеры (px)</option>
+    </select>
+
+    <div id="customRatioFields" class="hidden">
+      <input type="text" id="ratioInput" placeholder="Например: 4:3" />
     </div>
 
-    <script>
-        const backendUrl = 'https://bot.gulyatv.ru'; // Замените на ваш URL бэкенда
+    <div id="customSizeFields" class="hidden">
+      <input type="number" id="customWidth" placeholder="Ширина (px)" />
+      <input type="number" id="customHeight" placeholder="Высота (px)" />
+    </div>
 
-        async function generateImage() {
-            const prompt = document.getElementById("prompt").value;
-            const status = document.getElementById("status");
-            const imageContainer = document.getElementById("image-container");
-            const image = document.getElementById("generated-image");
-            const downloadButton = document.getElementById("download-button");
+    <button id="generate">Сгенерировать</button>
+    <div id="result">
+        <!-- сюда будет вставлена картинка и кнопка -->
+    </div>
+  </div>
 
-            status.textContent = "Generating image...";
-            imageContainer.style.display = "none";
-            downloadButton.style.display = "none";
+  <script>
+    const ratioSelect = document.getElementById('ratio');
+    const ratioInput = document.getElementById('ratioInput');
+    const customWidthInput = document.getElementById('customWidth');
+    const customHeightInput = document.getElementById('customHeight');
+    const customRatioFields = document.getElementById('customRatioFields');
+    const customSizeFields = document.getElementById('customSizeFields');
 
-            try {
-                const response = await fetch(`${backendUrl}/generate`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        prompt: prompt,
-                        width: 1024,
-                        height: 1024
-                    }),
-                });
+    ratioSelect.addEventListener('change', () => {
+      customRatioFields.classList.add('hidden');
+      customSizeFields.classList.add('hidden');
 
-                const result = await response.json();
+      if (ratioSelect.value === 'custom-ratio') {
+        customRatioFields.classList.remove('hidden');
+      } else if (ratioSelect.value === 'custom-size') {
+        customSizeFields.classList.remove('hidden');
+      }
+    });
 
-                if (response.ok) {
-                    status.textContent = "Image generated successfully!";
-                    image.src = result.image_url;
-                    imageContainer.style.display = "block";
-                    downloadButton.style.display = "block";
-                } else {
-                    status.textContent = `Error: ${result.error}`;
-                }
-            } catch (error) {
-                status.textContent = `Error: ${error.message}`;
-            }
+    document.getElementById('generate').addEventListener('click', async () => {
+      const prompt = document.getElementById('prompt').value;
+      const style = document.getElementById('style').value;
+      let width = 1024, height = 1024; // default
+
+      const ratioType = ratioSelect.value;
+
+      if (ratioType === 'custom-ratio') {
+        const ratio = ratioInput.value.split(':');
+        if (ratio.length !== 2 || isNaN(ratio[0]) || isNaN(ratio[1])) {
+          alert('Неверное соотношение, введите как a:b');
+          return;
         }
-
-        function downloadImage() {
-            const image = document.getElementById("generated-image");
-            const imageUrl = image.src;
-
-            // Создаём временную ссылку для скачивания
-            fetch(imageUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = "generated-image.png"; // Имя файла для скачивания
-                    link.click(); // Программный клик по ссылке
-                    URL.revokeObjectURL(link.href); // Освобождаем память
-                })
-                .catch(error => {
-                    console.error("Ошибка при скачивании изображения:", error);
-                });
+        const a = parseInt(ratio[0]), b = parseInt(ratio[1]);
+        if (a > b) {
+          width = 1024;
+          height = Math.round((b / a) * 1024);
+        } else {
+          height = 1024;
+          width = Math.round((a / b) * 1024);
         }
-    </script>
+      } else if (ratioType === 'custom-size') {
+        width = parseInt(customWidthInput.value);
+        height = parseInt(customHeightInput.value);
+        if (!width || !height || width < 64 || height < 64 || width > 1024 || height > 1024) {
+          alert('Введите допустимые размеры от 64 до 1024 px');
+          return;
+        }
+      } else {
+        const presets = {
+          '1:1': [1024, 1024],
+          '16:9': [1024, 576],
+          '9:16': [576, 1024],
+          '3:2': [1024, 680],
+          '2:3': [680, 1024]
+        };
+        [width, height] = presets[ratioType];
+      }
+
+      const res = await fetch('https://barkpicture.maxim11393.workers.dev/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, style, width, height })
+      });
+
+      const data = await res.json();
+      const result = document.getElementById('result');
+        
+        if (data.image) {
+          const base64 = data.image;
+          const imgUrl = `data:image/jpeg;base64,${base64}`;
+          result.innerHTML = `
+            <img src="${imgUrl}" alt="Генерированное изображение" />
+            <a href="${imgUrl}" download="barkpicture.jpg">
+              <button style="margin-top: 10px;">Скачать изображение</button>
+            </a>
+          `;
+        } else {
+            result.innerHTML = `<p>Ошибка: ${data.error}</p>`;
+        }
+  </script>
 </body>
 </html>
