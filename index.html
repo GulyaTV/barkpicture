@@ -152,18 +152,18 @@
       const data = await res.json();
       const result = document.getElementById('result');
         
-        if (data.image) {
-          const base64 = data.image;
-          const imgUrl = `data:image/jpeg;base64,${base64}`;
-          result.innerHTML = `
-            <img src="${imgUrl}" alt="Генерированное изображение" />
-            <a href="${imgUrl}" download="barkpicture.jpg">
-              <button style="margin-top: 10px;">Скачать изображение</button>
-            </a>
-          `;
-        } else {
-            result.innerHTML = `<p>Ошибка: ${data.error}</p>`;
-        }
+      if (data.image) {
+        const base64 = data.image;
+        const imgUrl = `data:image/jpeg;base64,${base64}`;
+        result.innerHTML = `
+          <img src="${imgUrl}" alt="Генерированное изображение" />
+          <a href="${imgUrl}" download="barkpicture.jpg">
+            <button style="margin-top: 10px;">Скачать изображение</button>
+          </a>
+        `;
+      } else {
+          result.innerHTML = `<p>Ошибка: ${data.error}</p>`;
+      }
   </script>
 </body>
 </html>
